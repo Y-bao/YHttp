@@ -1,23 +1,33 @@
 package appframe.module.http.task;
 
 
-public class HttpJustCacheTask extends HttpCacheTask<String> {
+import appframe.module.http.mode.HttpMode;
+
+public class HttpJustCacheTask extends BaseHttpCacheTask {
+
+    public HttpJustCacheTask() {
+        super();
+    }
+
+    public HttpJustCacheTask(HttpMode httpMode) {
+        super(httpMode);
+    }
 
     @Override
-    public String run() throws Exception {
+    public <T> String run(Class<T> cla, Object listener, int tag) throws Exception {
         String stringData = null;
         byte[] cacheData;
         String url = httpMode.getUrl();
         cacheData = getCache(url);
         if (cacheData != null) {
             stringData = new String(cacheData, getCharset());
-            noticeSucceed(stringData);
+            notice(listener,tag, stringData, cla);
         } else {
             byte[] byteData = httpMode.resultBytes();
             if (byteData != null) {
                 saveCache(url, byteData);
                 stringData = new String(byteData, getCharset());
-                noticeSucceed(stringData);
+                notice(listener,tag, stringData, cla);
             }
         }
         return stringData;

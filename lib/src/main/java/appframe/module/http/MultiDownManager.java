@@ -10,7 +10,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import appframe.module.http.task.HttpDownLoadTask;
-import appframe.module.http.task.HttpTask;
+import appframe.module.http.task.BaseHttpTask;
 import appframe.module.http.utils.HttpResult;
 import appframe.utils.io.FileUtil;
 import bolts.Continuation;
@@ -78,7 +78,7 @@ public class MultiDownManager {
         }, executor).onSuccessTask(new Continuation<String, Task<Void>>() {
             @Override
             public Task<Void> then(Task<String> task) throws Exception {
-                List<Task<HttpResult<File>>> tasks = new ArrayList<Task<HttpResult<File>>>();
+                List<Task<Void>> tasks = new ArrayList<Task<Void>>();
                 for (int i = 0; i < size; i++) {
                     tasks.add(getDownLoadTask(i));
                 }
@@ -97,12 +97,12 @@ public class MultiDownManager {
     }
 
 
-    public Task<HttpResult<File>> getDownLoadTask(int index) {
+    public Task<Void> getDownLoadTask(int index) {
         String url = mUrls.get(index);
         HttpDownLoadTask task = new HttpDownLoadTask();
         task.setUrl(url);
         task.setDirPath(mDirPath);
-        task.setHttpRequestListener(null, index);
+//        task.setHttpRequestListener(null, index);
         task.setHeader(header);
         task.setProxy(proxy);
         task.setReplace(true);
@@ -112,8 +112,13 @@ public class MultiDownManager {
         return pushInThreadPool(task);
     }
 
-    public Task pushInThreadPool(HttpTask httpTask) {
-        Task<HttpResult<File>> task = Task.call(httpTask, executor).continueWith(HttpResultContinuation, Task.UI_THREAD_EXECUTOR);
+    public Task<Void> pushInThreadPool(final BaseHttpTask httpTask) {
+        Task<Void> task = Task.call(new Callable<HttpResult<File>>() {
+            @Override
+            public HttpResult<File> call() throws Exception {
+                return httpTask.execute(File.class);
+            }
+        }, executor).continueWith(HttpResultContinuation, Task.UI_THREAD_EXECUTOR);
         return task;
     }
 

@@ -16,6 +16,19 @@ public class PathUtil {
         return strs[strs.length - 1];
     }
 
+    public static String getNameStr(String fileName) {
+        String spStr[] = fileName.split("\\.");
+        String img_name = "";
+        for (int i = 0; i < (spStr.length - 1); i++) {
+            if (i > 0) {
+                img_name += "." + spStr[0];
+            } else {
+                img_name += spStr[0];
+            }
+        }
+        return img_name;
+    }
+
     public static File getRandomFile(String filePath, String baseWord, String endWord) {
         File dirFile = new File(filePath);
         if (!dirFile.exists()) {

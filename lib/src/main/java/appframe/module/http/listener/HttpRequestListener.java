@@ -1,7 +1,7 @@
 package appframe.module.http.listener;
 
-public interface HttpRequestListener {
-    void onStart(int tag);
+import appframe.module.http.utils.HttpResult;
 
-    void onFinish(int result, String data, int tag);
+public interface HttpRequestListener<T> {
+    void onFinish(HttpResult<T> httpResult);
 }

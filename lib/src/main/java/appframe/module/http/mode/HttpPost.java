@@ -29,17 +29,16 @@ public class HttpPost extends HttpGet {
     @Override
     public void initHttpURLConnection(HttpURLConnection httpConnection) throws Exception {
         if (TextUtils.isEmpty(data)) {
-            super.initHttpURLConnection(httpConnection);
-        } else {
-            byte[] byteData = data.getBytes();
-            httpConnection.setRequestMethod("POST");
-            httpConnection.setDoInput(true);
-            httpConnection.setDoOutput(true);
-            httpConnection.setRequestProperty("Content_Type", "application/x-www-form-urlencoded");
-            httpConnection.setRequestProperty("Content-Length", String.valueOf(byteData.length));
-            OutputStream output = httpConnection.getOutputStream();
-            output.write(byteData);
+            data = "";
         }
+        byte[] byteData = data.getBytes();
+        httpConnection.setRequestMethod("POST");
+        httpConnection.setDoInput(true);
+        httpConnection.setDoOutput(true);
+        httpConnection.setRequestProperty("Content_Type", "application/x-www-form-urlencoded");
+        httpConnection.setRequestProperty("Content-Length", String.valueOf(byteData.length));
+        OutputStream output = httpConnection.getOutputStream();
+        output.write(byteData);
     }
 }
 // conn.setRequestProperty("Accept", "*/*");

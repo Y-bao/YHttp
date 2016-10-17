@@ -1,5 +1,7 @@
 package appframe.module.http.listener;
 
-public interface HttpDataListener extends HttpRequestListener {
-    void onGetData(String data, int tag);
+import appframe.module.http.utils.HttpResult;
+
+public interface HttpDataListener<T> extends HttpRequestListener<T> {
+    void onGetData(HttpResult<T> data);
 }

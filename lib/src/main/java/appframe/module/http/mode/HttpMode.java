@@ -106,6 +106,7 @@ public abstract class HttpMode {
     public abstract void initHttpURLConnection(HttpURLConnection httpConnection) throws Exception;
 
     public HttpMode init() throws Exception {
+        Log.i("url", getUrl());
         if (proxy == null) {
             httpURLConnection = (HttpURLConnection) new URL(url).openConnection();
         } else {
@@ -115,19 +116,23 @@ public abstract class HttpMode {
         httpURLConnection.setReadTimeout(readTimeout);
         initHeaders(httpURLConnection);
         initHttpURLConnection(httpURLConnection);
+        httpURLConnection.setInstanceFollowRedirects(true);
         return this;
     }
 
     public boolean request() throws Exception {
         init();
-        httpURLConnection.connect();
-        int responseCode = httpURLConnection.getResponseCode();
         outputHeaders(httpURLConnection);
-        if (responseCode < 200 || responseCode >= 400) {
-            httpURLConnection.disconnect();
-            return false;
+        int responseCode = httpURLConnection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP || responseCode == HttpURLConnection.HTTP_MOVED_PERM) {
+            url = httpURLConnection.getHeaderField("location");
+            return request();
+
         }
-        return true;
+        if (responseCode >= 200 && responseCode < 300) {
+            return true;
+        }
+        return false;
     }
 
     public HttpURLConnection getHttpURLConnection() {

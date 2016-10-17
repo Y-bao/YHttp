@@ -10,16 +10,22 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import appframe.module.http.listener.HttpDownLoadListener;
-import appframe.module.http.listener.HttpRequestListener;
-import appframe.module.http.utils.HttpDownCallBack;
-import appframe.module.http.utils.SizeInfos;
+import appframe.module.http.mode.HttpMode;
+import appframe.module.http.utils.HttpResult;
 
 
-public class HttpDownLoadTask extends HttpTask<File> {
+public class HttpDownLoadTask extends BaseHttpTask {
     private final static String LOADING_BASE_NAME = ".downloadybao";
     private String dirPath = "";
     private boolean replace = true;
+
+    public HttpDownLoadTask() {
+        super();
+    }
+
+    public HttpDownLoadTask(HttpMode httpMode) {
+        super(httpMode);
+    }
 
     public void setReplace(boolean replace) {
         this.replace = replace;
@@ -36,7 +42,7 @@ public class HttpDownLoadTask extends HttpTask<File> {
     }
 
     @Override
-    public File run() throws Exception {
+    public <T> String run(Class<T> cla, Object listener, int tag) throws Exception {
         InputStream inputStream = httpMode.resultStream();
         if (inputStream != null) {
             if (TextUtils.isEmpty(name)) {
@@ -56,35 +62,28 @@ public class HttpDownLoadTask extends HttpTask<File> {
                 checkThreadState();
                 out.write(buffer, 0, len);
                 sam += len;
-                nativeSize(size, sam);
             }
             in.close();
             out.close();
             File file = new File(dirPath, name);
             loadingfile.renameTo(file);
-            noticeSucceed(file);
+//            noticeSucceed(file);
             Log.i("url", "DownLoad:" + httpMode.getUrl());
-            return file;
+            return file.getAbsolutePath();
         }
         Log.i("url", "DownLoad:" + httpMode.getUrl());
         return null;
     }
 
-
-    @Override
-    public void setHttpRequestListener(HttpRequestListener httpRequestListener, int tag) {
-        if (httpRequestListener != null && httpRequestListener instanceof HttpDownLoadListener) {
-            httpCallback = new HttpDownCallBack((HttpDownLoadListener) httpRequestListener, tag);
-            return;
-        }
-        super.setHttpRequestListener(httpRequestListener, tag);
+    public HttpResult<File> executeReFile(Class<File> cla) {
+        return super.execute(cla);
     }
 
-
-    protected void nativeSize(long size, long nowSize) {
-        if (httpCallback != null) {
-            SizeInfos sizeInfos = new SizeInfos(size, nowSize, nowSize / (float) size * 100);
-            httpCallback.sendData(HttpDownCallBack.PROGRESS, sizeInfos);
+    @Override
+    protected <T> T strToT(String str, Class<T> cla) {
+        if (cla == File.class) {
+            return (T) new File(str);
         }
+        return null;
     }
 }
